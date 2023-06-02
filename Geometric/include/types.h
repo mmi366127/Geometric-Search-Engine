@@ -4,10 +4,14 @@
 #include <cstdint>
 #include <vector>
 
+
+#define errquit(m) { perror(m); exit(-1); }
+// error handling
+
+
 namespace geometric {
     using id_type = int32_t;
     using metric_type = double;
-    using multi_id_type = std::vector<id_type>;
     using coordinate_type = std::vector<metric_type>;
     struct node {
         id_type ID;

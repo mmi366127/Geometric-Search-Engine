@@ -1,10 +1,5 @@
-cmake_minimum_required(VERSION 3.4)
+cmake_minimum_required(VERSION 3.14)
 
-
-set(CMAKE_CXX_FLAGS )
-
-set(CMAKE_CXX_STANDARD_REQUIRED ON)
-set(CMAKE_CXX_STANDARD 17)
 # project name
 project(Geometric
     VERSION 0.1.0
@@ -12,6 +7,17 @@ project(Geometric
     LANGUAGES CXX
 )
 
-add_subdirectory(Geometric)
-add_subdirectory(tests)
+enable_testing()
 
+
+set(CMAKE_CXX_FLAGS )
+
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_CXX_STANDARD 17)
+
+
+find_package(pybind11 CONFIG REQUIRED)
+
+add_subdirectory(Geometric)
+add_subdirectory(python)
+add_subdirectory(tests)
