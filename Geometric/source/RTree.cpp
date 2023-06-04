@@ -14,12 +14,22 @@ namespace geometric {
 
 item::item(const id_type &_, const coordinate_type &pt) : id(_), point(pt) {}
 
-// RTNode
+// RNode
 
-RNode::RNode(enum nodeType t, size_t dim) : type(t), box(dim) {}
+RNode::RNode(enum nodeType t, size_t dim) : box(dim), type(t){}
 
 size_t RNode::size() const {
     return ptr.size();
+}
+
+// RheapItem
+
+RheapItem::RheapItem(metric_type d, item* it) : dis(d), _item(it) {}
+
+// Rcompare
+
+bool Rcompare::operator()(const RheapItem &a, const RheapItem &b) {
+    return a.dis == b.dis ? a._item->id < b._item->id : a.dis < b.dis;
 }
 
 // RTree
@@ -265,21 +275,39 @@ int RTree::insert(const coordinate_type &pt, const id_type &id) {
             root = new_root;
         }
     }
+    return 0;
+}
+
+bool RTree::bounds_overlap_ball(const coordinate_type &pt, metric_type d, RNode *x) {
+    metric_type distsum = 0.0;
+    size_t i;
+    for(i = 0; i < dim; ++i) {
+        if(pt[i] < x->box.low_bound[i]) {
+            distsum += distance->coordinate_distance(pt[i], x->box.low_bound[i], i);
+            if(distsum > d) return false;
+        }
+        else if(pt[i] > x->box.hi_bound[i]) {
+            distsum += distance->coordinate_distance(pt[i], x->box.hi_bound[i], i);
+            if(distsum > d) return false;
+        }
+    }
+    return true;
 }
 
 void RTree::range_search(RNode *x, const coordinate_type &c, const metric_type &r, std::vector<id_type> *res) {
-    metric_type curdis = distance->minDistance(c, x->box);
-    if(curdis > r) return;
     if(x->type == LEAF) {
         for(size_t i = 0; i < x->size(); ++i) {
             item *it = static_cast<item*>(x->ptr[i]);
-            if(distance->distance(it->point, c) <= r)
+            if(distance->distance(it->point, c) <= r) {
                 res->emplace_back(it->id);
+            }
         }
     }
     else {    
         for(size_t i = 0; i < x->size(); ++i) {
-            range_search(static_cast<RNode*>(x->ptr[i]), c, r, res);    
+            RNode *node = static_cast<RNode*>(x->ptr[i]);
+            if(bounds_overlap_ball(c, r, node))
+                range_search(node, c, r, res);    
         }
     }
 }
@@ -287,16 +315,24 @@ void RTree::range_search(RNode *x, const coordinate_type &c, const metric_type &
 void RTree::neighbor_search(const coordinate_type &pt, RNode* x, size_t k, RitemHeap* pq) {
     print("neighbor search, queue size %lu\n", pq->size());
     if(x->type == LEAF) {
-        
-    }
-    else {    
         for(size_t i = 0; i < x->size(); ++i) {
-            RNode *node = static_cast<RNode*>(x->ptr[i]);
-            metric_type curdis = distance->minDistance(pt, node->box);
+            item *it = static_cast<item*>(x->ptr[i]);
+            metric_type curdis = distance->distance(pt, it->point);
             if(pq->size() < k) {
-                neighbor_search(pt, node, k, pq);
+                pq->emplace(curdis, it);
             }
             else if(curdis < pq->top().dis) {
+                pq->pop();
+                pq->emplace(curdis, it);
+            }
+        }
+    }
+    else {    
+        metric_type dist = std::numeric_limits<metric_type>::max();
+        if(pq->size() == k) dist = pq->top().dis;
+        for(size_t i = 0; i < x->size(); ++i) {
+            RNode *node = static_cast<RNode*>(x->ptr[i]);
+            if(bounds_overlap_ball(pt, dist, node)) {
                 neighbor_search(pt, node, k, pq);
             }
         }
@@ -307,16 +343,44 @@ void RTree::neighbor_search(const coordinate_type &pt, RNode* x, size_t k, Ritem
 
 std::vector<id_type> RTree::range_query(coordinate_type center, metric_type r) {
     if(center.size() != dim) errquit("RTree range query: dim not match");
+    if(distance->distance() == 2) { // l2 distance
+        r = r * r;
+    }
     std::vector<id_type> ret;
     range_search(root, center, r, &ret);
+    print("get %lu points\n", ret.size());
+    std::sort(begin(ret), end(ret));
     return ret;
 }
 
 std::vector<id_type> RTree::K_nearest(const coordinate_type &pt, size_t k) {
-
+    if(pt.size() != dim) {
+        errquit("Query dim did not match!!!");
+    }
+    print("K nearest querying...\n");
+    RitemHeap *pq = new RitemHeap;
+    if(k >= id_set.size()) {
+        k = id_set.size();
+        for(size_t i = 0; i < items.size(); ++i) {
+            metric_type d = distance->distance(pt, items[i].point);
+            pq->emplace(d, &items[i]);
+        }
+    }
+    else {
+        neighbor_search(pt, root, k, pq);
+    }
+    std::vector<id_type> ret;
+    while(!pq->empty()) {
+        item *it = pq->top()._item;
+        pq->pop();
+        ret.emplace_back(it->id);
+    }
+    delete pq;
+    std::reverse(begin(ret), end(ret));
+    return ret;
 }
 
-int RTree::ndim() {
+size_t RTree::ndim() {
     return dim;
 }
 

@@ -34,13 +34,10 @@ namespace geometric {
     struct RheapItem {
         double dis;  // distance between the query point
         item *_item; // pointer of the node 
-        RheapItem(metric_type, RNode*);
+        RheapItem(metric_type, item*);
     };
     struct Rcompare {
         ssize_t dim;
-        Rcompare(); // distance comparator
-        Rcompare(ssize_t dim); // dim specific comparator
-        bool operator()(const RNode &a, const RNode &b);
         bool operator()(const RheapItem &a, const RheapItem &b);
     };
     typedef std::priority_queue<RheapItem, std::vector<RheapItem>, Rcompare> RitemHeap;
@@ -50,10 +47,10 @@ namespace geometric {
             RTree(std::vector<coordinate_type> points, std::vector<id_type> IDs);
             std::vector<id_type> K_nearest(const coordinate_type &pt, size_t k);
             std::vector<id_type> range_query(coordinate_type center, metric_type r);
-            int ndim();
+            size_t ndim();
         
         private:
-            int dim;
+            size_t dim;
             RNode *root;
             Metric *distance;
             std::vector<item> items;

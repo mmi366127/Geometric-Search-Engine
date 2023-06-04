@@ -207,6 +207,7 @@ std::vector<id_type> Kd_Tree::K_nearest(const coordinate_type &pt, size_t k) {
         heap->pop();
         ret.emplace_back(node->id);
     }
+    delete heap;
     std::reverse(begin(ret), end(ret));
     return ret;
 }   

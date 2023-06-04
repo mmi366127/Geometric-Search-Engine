@@ -109,18 +109,18 @@ void test_RTree(size_t n, size_t dim, size_t k, metric_type r) {
     coordinate_type pt = random_point(dim);
     
     // test K nearest 
-    // print("nearest K search...\n");
-    // vector<id_type> res_K = geo.K_nearest(pt, k);
-    // vector<id_type> res_K_ = bf.K_nearest(pt, k);
-    // print_result(res_K);
-    // print_result(res_K_);
+    print("nearest K search...\n");
+    vector<id_type> res_K = geo.K_nearest(pt, k);
+    vector<id_type> res_K_ = bf.K_nearest(pt, k);
+    print_result(res_K);
+    print_result(res_K_);
     
     // test range query
-    // print("range query\n");
-    // vector<id_type> res = geo.range_query(pt, r);
-    // vector<id_type> res_ = bf.range_query(pt, r);
-    // print_result(res);
-    // print_result(res_);
+    print("range query\n");
+    vector<id_type> res = geo.range_query(pt, r);
+    vector<id_type> res_ = bf.range_query(pt, r);
+    print_result(res);
+    print_result(res_);
 }
 
 int main() {

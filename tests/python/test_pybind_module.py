@@ -1,93 +1,92 @@
-
-
-# append import path
-import sys, os
-sys.path.append('/home/lolicon/workspace/NSD/Geometric-Search-Engine/python')
-
-# import Geometric module
-import Geometric
-
-
 import unittest
-import random
 import timeit
-import os
 
-import numpy as np
+from Generator import *
+from tester import *
 
+# test for higher dimensions
+dims = [
+    2, 3, 5, 16, 32
+]
 
-def make_dataset(n, dim):
-    IDs = np.arange(0, n, 1)
-    pts = np.random.uniform(-1e9, 1e9, size=(n, dim))
-    return pts, IDs
+# test size for correctness test
+size_correct = [
+    100, 500, 1000, 5000, 10000
+]
 
-
-class TestBruteForce(unittest.TestCase):
-
-    def test_init(self):
-        pts, IDs = make_dataset(100, 3)
-        geo = Geometric.BruteForce(pts, IDs)
-    
-    def test_range_query(self):
-        pts, IDs = make_dataset(100, 3)
-        geo = Geometric.BruteForce(pts, IDs)
-        center = np.random.uniform(-1e9, 1e9, size=(geo.ndim))
-        res = geo.range_query(center, 1e9)
-        print(res)
-
-    def test_K_nearest(self):
-        pts, IDs = make_dataset(100, 3)
-        geo = Geometric.BruteForce(pts, IDs)
-        center = np.random.uniform(-1e9, 1e9, size=(geo.ndim))
-        res = geo.K_nearest(center, 50)
-        print(res)
+# test size for performance test
+size_performance = [
+    100000, 500000, 1000000
+]
 
 
-class TestKdTree(unittest.TestCase):
+Kd_Tree_Tests = []
+for size in size_correct:
+    for dim in dims:
+        gen = UniformGenerator(size, dim)
+        tester = TestCorrect(gen, "KDTree")
+        Kd_Tree_Tests.append(tester)
 
-    def test_init(self):
-        pts, IDs = make_dataset(1000000, 3)
-        geo = Geometric.KDTree(pts, IDs)
+R_Tree_Tests = []
+for size in size_correct:
+    for dim in dims:
+        gen = UniformGenerator(size, dim)
+        tester = TestCorrect(gen, "RTree")
+        R_Tree_Tests.append(tester)
+
+
+class TestKdTreeCorrectness(unittest.TestCase):
 
     def test_range_qurey(self):
-        pts, IDs = make_dataset(1000000, 3)
-        geo = Geometric.KDTree(pts, IDs)
+        
+        for test in Kd_Tree_Tests:
+            print(f"Test the correctness of range query of Kd-Tree with {test.generator.n} points in {test.generator.dim} dimension.")
+            ns = dict(tester=test)
+            t_query = timeit.Timer("tester.range_query()", globals=ns)
+            time_query = min(t_query.repeat(1, 10))
 
-        center = np.random.uniform(-1e9, 1e9, size=(geo.ndim))
-
-        res = geo.range_query(center, 1e9)
-
-        print(res)
-
-    def test_K_nearest(self):
-        pts, IDs = make_dataset(1000000, 3)
-        geo = Geometric.KDTree(pts, IDs)
-
-        center = np.random.uniform(-1e9, 1e9, size=(geo.ndim))
-
-        res = geo.K_nearest(center, 500)
-
-        print(res)
-
-
-class TestRtree(unittest.TestCase):
-
-    def test_init(self):
-        pts, IDs = make_dataset(1000, 3)
-        geo = Geometric.RTree(pts, IDs)
-
-    def test_range_query(self):
-        pass
+            print(f"Test finish in {time_query} seconds")
 
     def test_K_nearest(self):
-        pass
+
+        for test in Kd_Tree_Tests:
+            print(f"Test the correctness of K nearest neighbor of Kd-Tree with {test.generator.n} points in {test.generator.dim} dimensions.")
+            ns = dict(tester=test)
+            t_query = timeit.Timer("tester.K_nearest()", globals=ns)
+            time_query = min(t_query.repeat(1, 10))
+
+            print(f"Test finish in {time_query} seconds")
+
+
+class TestRTreeCorrectness(unittest.TestCase):
+
+    def test_range_qurey(self):
+        
+        for test in R_Tree_Tests:
+            print(f"Test the correctness of range query of R-Tree with {test.generator.n} points in {test.generator.dim} dimension.")
+            ns = dict(tester=test)
+            t_query = timeit.Timer("tester.range_query()", globals=ns)
+            time_query = min(t_query.repeat(1, 10))
+
+            print(f"Test finish in {time_query} seconds")
+
+    def test_K_nearest(self):
+        for test in R_Tree_Tests:
+            print(f"Test the correctness of K nearest neighbor of R-Tree with {test.generator.n} points in {test.generator.dim} dimensions.")
+            ns = dict(tester=test)
+            t_query = timeit.Timer("tester.K_nearest()", globals=ns)
+            time_query = min(t_query.repeat(1, 10))
+
+            print(f"Test finish in {time_query} seconds")
+
 
 
 if __name__ == '__main__':
+    # unittest.main()
+    # x = TestKdTreeCorrectness()
+    # x.test_range_qurey()
+    # x.test_K_nearest()
 
-
-    x = TestRtree()
-
-    x.test_init()
+    x = TestRTreeCorrectness()
     x.test_range_qurey()
     x.test_K_nearest()
