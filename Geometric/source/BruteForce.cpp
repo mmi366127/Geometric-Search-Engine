@@ -10,6 +10,7 @@
 namespace geometric {
 
 BruteForce::BruteForce(std::vector<coordinate_type> points, std::vector<id_type> IDs) : dim(points[0].size()), point_ids(IDs), points(points) {
+    distance = new L2Distance;
     if(points.size() != IDs.size()) {
         errquit("Inconsistent number of points and their IDs.");
     }
@@ -27,7 +28,8 @@ BruteForce::BruteForce(std::vector<coordinate_type> points, std::vector<id_type>
 std::vector<id_type> BruteForce::K_nearest(const coordinate_type &coordinate, int k) {
     std::vector<std::pair<metric_type, id_type>> pts;
     for(size_t i = 0; i < points.size(); ++i) {
-        pts.emplace_back(distance_l2(coordinate, points[i]), point_ids[i]);
+        metric_type d = distance->distance(coordinate, points[i]);
+        pts.emplace_back(d, point_ids[i]);
     }
     std::sort(pts.begin(), pts.end());
     std::vector<id_type> ret;
@@ -37,10 +39,14 @@ std::vector<id_type> BruteForce::K_nearest(const coordinate_type &coordinate, in
     return ret;
 }   
 
-std::vector<id_type> BruteForce::range_query(coordinate_type center, metric_type distance) {
+std::vector<id_type> BruteForce::range_query(coordinate_type center, metric_type range) {
     std::vector<id_type> ret;
+    if(distance->distance() == 2) {
+        range = range * range; // L2 distance 
+    }
     for(size_t i = 0; i < points.size(); ++i) {
-        if(distance_l1(center, points[i]) < distance) {
+        metric_type d = distance->distance(center, points[i]);
+        if(d < range) {
             ret.emplace_back(point_ids[i]);
         }
     }
@@ -70,6 +76,10 @@ int BruteForce::remove(id_type id) {
         } 
     }
     return -1; // should not reach here
+}
+
+size_t BruteForce::ndim() {
+    return dim;
 }
 
 };

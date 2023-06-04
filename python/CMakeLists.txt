@@ -1,2 +1,2 @@
-pybind11_add_module(pybind_module pybind_module.cpp)
-target_link_libraries(pybind_module PRIVATE geometry_search)
+pybind11_add_module(Geometric Geometric.cpp)
+target_link_libraries(Geometric PRIVATE geometry_search)

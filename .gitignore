@@ -38,3 +38,6 @@ CMakeCache.txt
 Makefile
 cmake_install.cmake
 CTestTestfile.cmake
+/Testing
+__pycache__/
+.pytest_cache/

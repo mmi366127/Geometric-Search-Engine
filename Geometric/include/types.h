@@ -1,13 +1,17 @@
-#ifndef TYPES_H_
-#define TYPES_H_
+#pragma once
 
 #include <cstdint>
 #include <vector>
-
+#include <stdlib.h>
 
 #define errquit(m) { perror(m); exit(-1); }
 // error handling
 
+#ifdef __DEBUG__
+#define print printf
+#else
+#define print(...) 
+#endif
 
 namespace geometric {
     using id_type = int32_t;
@@ -18,5 +22,3 @@ namespace geometric {
         coordinate_type point;
     };
 }
-
-#endif
