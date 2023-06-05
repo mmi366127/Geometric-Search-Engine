@@ -313,7 +313,6 @@ void RTree::range_search(RNode *x, const coordinate_type &c, const metric_type &
 }
 
 void RTree::neighbor_search(const coordinate_type &pt, RNode* x, size_t k, RitemHeap* pq) {
-    print("neighbor search, queue size %lu\n", pq->size());
     if(x->type == LEAF) {
         for(size_t i = 0; i < x->size(); ++i) {
             item *it = static_cast<item*>(x->ptr[i]);

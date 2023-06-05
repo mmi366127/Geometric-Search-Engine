@@ -32,6 +32,7 @@
 *.app
 
 # cmake build directory
+*.tcl 
 build/
 CMakeFiles/
 CMakeCache.txt
