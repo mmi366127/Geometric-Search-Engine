@@ -2,7 +2,7 @@ import unittest
 import timeit
 
 from Generator import *
-from tester import *
+from Tester import *
 
 # test for higher dimensions
 dims = [
@@ -13,12 +13,6 @@ dims = [
 size_correct = [
     100, 500, 1000, 5000, 10000
 ]
-
-# test size for performance test
-size_performance = [
-    100000, 500000, 1000000
-]
-
 
 Kd_Tree_Tests = []
 for size in size_correct:
@@ -34,7 +28,6 @@ for size in size_correct:
         gen = UniformGenerator(size, dim)
         tester = TestCorrect(gen, "RTree")
         R_Tree_Tests.append(tester)
-
 
 
 class TestKdTreeCorrectness(unittest.TestCase):
@@ -80,12 +73,6 @@ class TestRTreeCorrectness(unittest.TestCase):
             time_query = sum(t_query.repeat(1, 10)) / 10.0
 
             print(f"Test finish in {time_query} seconds")
-
-
-class TestkDTreeCorrectness(unittest.TestCase):
-
-
-
 
 
 if __name__ == '__main__':

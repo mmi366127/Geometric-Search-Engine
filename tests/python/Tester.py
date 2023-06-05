@@ -12,8 +12,10 @@ class TestCorrect(object):
     def __init__(self, generator, testant="KdTree"):
 
         self.generator = generator
-        
         point, ID = self.generator.make_dataset()
+        
+        self.ID = ID
+        self.point = point
 
         # testant
         constructor = getattr(Geometric, testant)
@@ -62,6 +64,9 @@ class TestPerformance(object):
         self.generator = generator
 
         point, ID = self.generator.make_dataset()
+
+        self.ID = ID
+        self.point = point
 
         # testant
         constructor = getattr(Geometric, testant)
